@@ -4,7 +4,7 @@
 
 ---
 
-### 👋 About Me
+### About Me
 
 I’m **Garyson**, an IT student passionate about **programming**, **web development**, and **hardware engineering**. I love turning ideas into projects while exploring new technologies.
 
@@ -13,7 +13,7 @@ I’m **Garyson**, an IT student passionate about **programming**, **web develop
 - Exploring **front-end development and software fundamentals**
 - In my free time, I enjoy **building small projects**, **experimenting with code**, and **game development**
 
-I’m excited to connect with the GitHub community and grow as a developer. 🚀
+I’m excited to connect with the GitHub community and grow as a developer. 
 
 ---
 
