@@ -49,19 +49,6 @@ I’m excited to connect with the GitHub community and grow as a developer.
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/blender/blender-original.svg" height="40" alt="blender logo" />
 </div>
 
----
-
-### 🔥 My GitHub Stats
-
-<div align="center">
-  <img src="https://streak-stats.demolab.com?user=GDev1024&locale=en&mode=daily&theme=dark&hide_border=false&border_radius=5&order=3" height="180" alt="GitHub Streak Stats" />
-  <img width="12" />
-  <img src="https://github-readme-stats.vercel.app/api?username=GDev1024&show_icons=true&theme=dark&count_private=true" height="180" alt="GitHub Stats" />
-  <img width="12" />
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=GDev1024&layout=compact&theme=dark" height="180" alt="Top Languages" />
-</div>
-
----
 
 ### 📫 Contact Me
 
