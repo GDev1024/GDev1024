@@ -53,14 +53,3 @@ I’m excited to connect with the GitHub community and grow as a developer.
   <img width="12" />
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/photoshop/photoshop-line.svg" height="40" alt="Photoshop logo" />
 </div>
-
-### 📫 Contact Me
-
-<div align="left">
-  <a href="mailto:your.email@example.com">
-    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email Badge" />
-  </a>
-  <a href="https://www.linkedin.com/in/garyson-walker-771449389/" target="_blank">
-    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Badge" />
-  </a>
-</div>
