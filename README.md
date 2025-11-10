@@ -8,11 +8,6 @@
 
 I’m **Garyson**, an IT student passionate about **programming**, **web development**, and **hardware engineering**. I love turning ideas into projects while exploring new technologies.
 
-**A little more about me:**
-- Currently learning various programming languages such as **C++, JavaScript, HTML5, CSS, etc.**
-- Exploring **front-end development and software fundamentals**
-- In my free time, I enjoy **building small projects**, **experimenting with code**, and **game development**
-
 I’m excited to connect with the GitHub community and grow as a developer. 
 
 ---
