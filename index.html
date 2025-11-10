@@ -1,397 +1,268 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Garyson Walker — The Digital Terminal</title>
-  <meta name="description" content="Garyson Walker | The Matrix Terminal portfolio — interactive terminal experience." />
-
-  <style>
-    /* ---------- Reset & base ---------- */
-    :root{
-      --bg:#000;
-      --neon:#00ff66; /* matrix green */
-      --glass: rgba(0,255,102,0.04);
-      --crt-shadow: 0 20px 60px rgba(0,255,102,0.03), inset 0 0 120px rgba(0,255,102,0.02);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--neon);font-family:var(--mono);-webkit-font-smoothing:antialiased}
-    a{color:var(--neon)}
-
-    /* ---------- Page layout ---------- */
-    .stage{
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:2rem;
-      position:relative;
-      overflow:hidden;
-    }
-
-    /* Matrix canvas sits behind the terminal */
-    #matrix-canvas{position:absolute;inset:0;z-index:0}
-
-    /* ---------- CRT frame (monitor) ---------- */
-    .crt-frame{
-      position:relative;
-      width:min(1000px,94vw);
-      height:min(680px,86vh);
-      border-radius:14px;
-      background:linear-gradient(180deg, rgba(0,0,0,0.75), rgba(0,0,0,0.9));
-      box-shadow: 0 30px 100px rgba(0,0,0,0.9), var(--crt-shadow);
-      padding:18px;
-      z-index:2;
-      overflow:hidden;
-      border:1px solid rgba(0,255,102,0.06);
-    }
-
-    /* Fake top bar with window controls */
-    .crt-topbar{
-      height:34px;display:flex;align-items:center;gap:12px;padding:6px 10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-      border-radius:8px;backdrop-filter: blur(2px);
-    }
-    .controls{display:flex;gap:8px;align-items:center}
-    .dot{width:12px;height:12px;border-radius:50%;box-shadow:0 1px 0 rgba(0,0,0,0.5)}
-    .close{background:rgba(255,80,80,0.95)}
-    .min{background:rgba(255,200,80,0.95)}
-    .max{background:rgba(120,255,150,0.95)}
-    .title{flex:1;color:rgba(150,255,190,0.9);font-weight:600;font-size:13px}
-
-    /* monitor bezel */
-    .monitor{
-      border-radius:10px;overflow:hidden;margin-top:10px;height:calc(100% - 64px);display:flex;align-items:center;justify-content:center;position:relative;z-index:2;
-      background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.7));
-    }
-
-    /* Glass glare & scanlines */
-    .monitor::after{
-      content:"";position:absolute;inset:0;pointer-events:none;
-      background-image: linear-gradient(transparent 60%, rgba(0,255,102,0.02) 60%);
-      background-size:100% 3px;mix-blend-mode:screen;opacity:0.55;
-      transform:translateZ(0);
-    }
-    .scanline{
-      position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(transparent, transparent 2px, rgba(0,255,102,0.02) 3px);
-      opacity:0.4;mix-blend-mode:overlay
-    }
-
-    /* ---------- Terminal window ---------- */
-    .terminal-wrap{
-      width:92%;height:88%;padding:18px;border-radius:6px;background:rgba(0,0,0,0.6);box-shadow:inset 0 0 40px rgba(0,255,102,0.02);border:1px solid rgba(0,255,102,0.06);overflow:hidden;position:relative;display:flex;flex-direction:column;
-    }
-    .terminal-output{flex:1;overflow:auto;padding-right:8px}
-    .line{white-space:pre-wrap;font-size:15px;line-height:1.45;color:var(--neon);opacity:0.95}
-    .muted{color:rgba(0,255,102,0.55);font-size:13px}
-    .flicker{animation:flicker 2.4s infinite}
-
-    @keyframes flicker{
-      0%{opacity:1}
-      4%{opacity:0.8}
-      6%{opacity:1}
-      8%{opacity:0.6}
-      10%{opacity:1}
-      100%{opacity:1}
-    }
-
-    /* input area */
-    .terminal-input{display:flex;gap:12px;align-items:center;padding-top:12px}
-    .prompt{min-width:80px;color:rgba(120,255,150,0.95)}
-    .cmdline{flex:1}
-    input.cmd{width:100%;background:transparent;border:none;outline:none;color:var(--neon);font-family:var(--mono);font-size:15px}
-
-    /* buttons for quick commands */
-    .quick{display:flex;gap:8px;margin-top:10px}
-    .btn{background:transparent;border:1px solid rgba(0,255,102,0.08);padding:6px 10px;border-radius:6px;color:var(--neon);cursor:pointer;font-family:var(--mono);font-size:13px}
-    .btn:hover{transform:translateY(-2px)}
-
-    /* small footer */
-    .footer{position:absolute;left:18px;bottom:10px;color:rgba(0,255,102,0.12);font-size:12px}
-
-    /* skill bars (when expanded) */\    
-    .skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
-    .skill{background:rgba(0,255,102,0.02);padding:8px;border-radius:6px;border:1px solid rgba(0,255,102,0.03)}
-    .skill .label{font-size:13px;opacity:0.9}
-    .bar{height:8px;background:rgba(0,255,102,0.08);border-radius:999px;margin-top:6px;overflow:hidden}
-    .bar > i{display:block;height:100%;width:0%;background:linear-gradient(90deg, rgba(0,255,102,0.9), rgba(0,200,120,0.9));border-radius:999px}
-
-    /* responsive tweaks */
-    @media (max-width:720px){
-      .crt-frame{height:92vh;padding:12px}
-      .terminal-wrap{width:96%;height:86%}
-      .title{display:none}
-    }
-
-    /* custom cursor */
-    body.cursor-glow{cursor:none}
-    .glow-cursor{position:fixed;pointer-events:none;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);z-index:9999;mix-blend-mode:screen;box-shadow:0 0 18px rgba(0,255,102,0.9);background:rgba(0,255,102,0.95);opacity:0.9}
-
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garyson Walker - Matrix Portfolio</title>
+<style>
+:root{
+  --neon:#00ff66;
+  --bg:#000;
+  --font:"Courier New", monospace;
+}
+*{
+  margin:0; padding:0;
+  box-sizing:border-box;
+  font-family:var(--font);
+}
+body{
+  background:var(--bg);
+  color:var(--neon);
+  overflow:hidden;
+  cursor:none;
+}
+#matrix{
+  position:fixed;
+  top:0; left:0;
+  width:100vw; height:100vh;
+  z-index:1;
+}
+#terminal{
+  position:fixed;
+  top:0; left:0;
+  width:100vw; height:100vh;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  z-index:2;
+  pointer-events:none;
+}
+#output{
+  flex:1;
+  overflow-y:auto;
+  white-space:pre-wrap;
+  padding-right:20px;
+  pointer-events:auto;
+}
+.line{ margin:3px 0; }
+.prompt-line{
+  display:flex;
+  align-items:center;
+  pointer-events:auto;
+}
+.prompt{
+  margin-right:5px;
+}
+input.prompt-input{
+  background:transparent;
+  border:none;
+  outline:none;
+  color:var(--neon);
+  width:100%;
+  font-family:var(--font);
+  font-size:1rem;
+  caret-color:var(--neon);
+}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-thumb{background:var(--neon);}
+.glow-cursor{
+  position:fixed;
+  pointer-events:none;
+  width:12px;height:12px;
+  border-radius:50%;
+  left:0;top:0;
+  transform:translate(-50%,-50%);
+  z-index:9999;
+  mix-blend-mode:screen;
+  background:rgba(0,255,102,0.95);
+  box-shadow:0 0 18px rgba(0,255,102,0.9);
+  opacity:0.9;
+}
+a{color:var(--neon); text-decoration:none;}
+</style>
 </head>
 <body>
-  <div class="stage">
-    <canvas id="matrix-canvas"></canvas>
 
-    <div class="crt-frame" role="region" aria-label="Garyson Walker portfolio">
-      <div class="crt-topbar">
-        <div class="controls"><span class="dot close"></span><span class="dot min"></span><span class="dot max"></span></div>
-        <div class="title">Garyson_Walker.exe — Terminal</div>
-        <div class="muted">Matrix • Grenada</div>
-      </div>
+<canvas id="matrix"></canvas>
 
-      <div class="monitor">
-        <div class="scanline" aria-hidden="true"></div>
-
-        <div class="terminal-wrap" id="terminal">
-          <div class="terminal-output" id="output" aria-live="polite"></div>
-
-          <div class="terminal-input">
-            <div class="prompt">guest@matrix:~$</div>
-            <div class="cmdline"><input id="cmd" class="cmd" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" /></div>
-          </div>
-
-          <div class="quick" aria-hidden="true">
-            <button class="btn" data-cmd="about">about</button>
-            <button class="btn" data-cmd="projects">projects</button>
-            <button class="btn" data-cmd="skills">skills</button>
-            <button class="btn" data-cmd="contact">contact</button>
-            <button class="btn" id="surprise">surprise</button>
-          </div>
-
-          <div class="footer">Garyson Walker • interactive terminal (press 'help')</div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- custom cursor -->
-    <div id="cursor" class="glow-cursor" style="display:none"></div>
+<div id="terminal">
+  <div id="output"></div>
+  <div class="prompt-line">
+    <div class="prompt">></div>
+    <input type="text" class="prompt-input" id="cmd" autofocus autocomplete="off">
   </div>
+</div>
 
-  <script>
-    /* ================== Matrix Rain ================== */
-    (function matrixRain(){
-      const canvas = document.getElementById('matrix-canvas');
-      const ctx = canvas.getContext('2d');
-      let W=canvas.width=innerWidth, H=canvas.height=innerHeight;
-      const fontSize = 16 * (Math.min(W,1200)/1200); // scale font a bit
-      const columns = Math.floor(W / fontSize) + 1;
-      const drops = new Array(columns).fill(1);
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*()*+-=;:<>/\\|[]{}~'.split('');
+<div class="glow-cursor" id="cursor"></div>
 
-      function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
-      function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight;}
-      addEventListener('resize',()=>{resize();});
+<script>
+// --------------------------------------------------
+// Custom Mouse Cursor (Smooth & Stable)
+// --------------------------------------------------
+(function cursor(){
+  const cursor = document.getElementById("cursor");
+  window.addEventListener("mousemove", e=>{
+    cursor.style.left = e.clientX+"px";
+    cursor.style.top  = e.clientY+"px";
+  });
+})();
 
-      function draw(){
-        ctx.fillStyle='rgba(0,0,0,0.08)';
-        ctx.fillRect(0,0,W,H);
-        ctx.fillStyle='rgba(0,255,102,0.9)';
-        ctx.font = fontSize + 'px monospace';
-        for(let i=0;i<drops.length;i++){
-          const text = letters[Math.floor(Math.random()*letters.length)];
-          ctx.fillText(text, i*fontSize, drops[i]*fontSize);
-          if(drops[i]*fontSize > H && Math.random()>0.975) drops[i]=0;
-          drops[i]++;
-        }
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
+// --------------------------------------------------
+// Matrix Rain Effect (Optimized Performance)
+// --------------------------------------------------
+(function matrixRain(){
+  const c = document.getElementById("matrix");
+  const ctx = c.getContext("2d");
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
 
-    /* ================== Terminal Logic ================== */
-    (function terminal(){
-      const output = document.getElementById('output');
-      const input = document.getElementById('cmd');
-      const quick = document.querySelectorAll('.btn');
-      const surprise = document.getElementById('surprise');
+  const chars = "01";
+  const font = 16;
+  const columns = Math.floor(c.width / font);
+  const drops = new Array(columns).fill(1);
 
-      // Data
-      const profile = {
-        name:'Garyson Walker',
-        location:'Grenada',
-        role:'IT Student | Aspiring Software & Web Developer',
-        languages:['Python','JavaScript','C++','HTML','CSS','Lua'],
-        projects:[
-          {title:'Local Farmers Marketplace App',desc:'Mobile-first marketplace to connect local farmers with customers.',link:'#'},
-          {title:'Password Strength Checker',desc:'CLI + GUI project that evaluates password strength.',link:'#'},
-          {title:'Roblox Mini-Game',desc:'Caribbean-themed adventure with custom mechanics.',link:'#'}
-        ],
-        contact:{email:'youremail@example.com',github:'github.com/yourusername',linkedin:'linkedin.com/in/yourprofile'}
-      };
+  function draw(){
+    ctx.fillStyle = "rgba(0,0,0,0.10)";
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle = "#00ff66";
+    ctx.font = font+"px monospace";
 
-      // helper: print lines with typing animation
-      function typeLine(text,opts={}){
-        const line = document.createElement('div');
-        line.className='line';
-        output.appendChild(line);
-        output.scrollTop = output.scrollHeight;
-        return new Promise(resolve=>{
-          const speed = opts.speed || 18; // ms per char
-          let i=0;
-          const bl = setInterval(()=>{
-            line.textContent = text.slice(0,i+1);
-            output.scrollTop = output.scrollHeight;
-            i++;
-            if(i>=text.length){
-              clearInterval(bl);
-              if(opts.delay) setTimeout(resolve,opts.delay); else resolve();
-            }
-          },speed);
-        });
-      }
+    for(let i=0;i<drops.length;i++){
+      const text = chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillText(text, i*font, drops[i]*font);
+      if(drops[i]*font > c.height && Math.random()>0.975) drops[i]=0;
+      drops[i]++;
+    }
 
-      // Quick print multiline
-      async function printBlock(lines,opts={}){
-        for(const l of lines){
-          await typeLine(l,{speed:opts.speed||14});
-        }
-      }
+    // limit FPS = smoother + less CPU
+    setTimeout(()=>requestAnimationFrame(draw), 30);
+  }
+  draw();
+})();
 
-      // Commands
-      const commands = {
-        help: async ()=>{
-          await printBlock([
-            'Available commands:',
-            '  about     - show a short bio',
-            '  projects  - list a few projects (type open <n> to view more)',
-            '  skills    - animated skill bars',
-            '  contact   - show contact info',
-            '  clear     - clear the terminal',
-            '  surprise  - unlock a secret'
-          ]);
-        },
-        about: async ()=>{
-          await printBlock([
-            '$ whoami',
-            `Name: ${profile.name}`,
-            `Location: ${profile.location}`,
-            `Role: ${profile.role}`,
-            `Languages: ${profile.languages.join(', ')}`,
-            'Mission: Build tools that fuse creativity and code.'
-          ]);
-        },
-        projects: async ()=>{
-          let idx=1;
-          for(const p of profile.projects){
-            await typeLine(`${idx}. ${p.title} — ${p.desc}`);
-            idx++;
-          }
-          await typeLine('\nType: open <number>  (e.g. open 1)');
-        },
-        skills: async ()=>{
-          await typeLine('Decrypting skillset...');
-          // show skill grid
-          const container = document.createElement('div');
-          container.className='skills-grid';
-          for(const lang of profile.languages){
-            const s = document.createElement('div'); s.className='skill';
-            s.innerHTML = `<div class='label'>${lang}</div><div class='bar'><i style='width:0%'></i></div>`;
-            container.appendChild(s);
-          }
-          output.appendChild(container);
-          // animate bars
-          const bars = container.querySelectorAll('.bar > i');
-          const targets = [85,75,80,78,70,60];
-          bars.forEach((b,i)=>{
-            setTimeout(()=>{ b.style.transition='width 1.2s ease-out'; b.style.width = targets[i] + '%'; }, i*200);
-          });
-          output.scrollTop = output.scrollHeight;
-        },
-        contact: async ()=>{
-          await printBlock([
-            'Contact:',
-            ` Email: ${profile.contact.email}`,
-            ` GitHub: ${profile.contact.github}`,
-            ` LinkedIn: ${profile.contact.linkedin}`
-          ]);
-        },
-        clear: async ()=>{ output.innerHTML=''; },
-        surprise: async ()=>{ await commands.unlock(); }
-      };
+// --------------------------------------------------
+// Terminal System
+// --------------------------------------------------
+const output = document.getElementById("output");
+const input = document.getElementById("cmd");
 
-      // secret unlock
-      commands.unlock = async ()=>{
-        await typeLine('ACCESS GRANTED. Opening secret data...');
-        await typeLine('Loading...');
-        const secret = [
-          '>> SECRET: Garyson is experimenting with Blender 3D models and low-poly hardware rendering.',
-          '>> SECRET: Loves building small tools that solve everyday problems in Grenada.'
-        ];
-        for(const s of secret) await typeLine(s);
-      };
+const profile = {
+  name: "Garyson Walker",
+  role: "Software Developer",
+  about: "I build clean, modern software with real-world impact. Focused on web development, secure systems, and automation.",
+  contact:{
+    email: "mailto:jesuisgxry@gmail.com",
+    github: "https://github.com/GDev1024",
+    linkedin: "http://linkedin.com/in/garyson-walker-845183388"
+  },
+  skills:[
+    "HTML/CSS/JavaScript",
+    "Node.js",
+    "Python",
+    "Linux/Ubuntu server hosting"
+  ],
+  projects:[
+    "⚡ Portfolio Terminal Interface (this one)",
+    "📦 Web hosting prototype on Ubuntu",
+    "🤖 Automation + scripting tools"
+  ]
+};
 
-      // parse input
-      function parse(raw){
-        const parts = raw.trim().split(/\s+/);
-        const cmd = parts[0].toLowerCase();
-        const arg = parts[1];
-        return {cmd,arg};
-      }
+// smooth typer (optimized)
+function typeLine(text, speed=18){
+  const line = document.createElement("div");
+  line.className="line";
+  output.appendChild(line);
 
-      // handle open <n>
-      async function handleOpen(n){
-        const idx = parseInt(n,10) - 1;
-        if(isNaN(idx) || idx<0 || idx>=profile.projects.length){
-          await typeLine('Project index out of range.');
-          return;
-        }
-        const p = profile.projects[idx];
-        await typeLine(`Opening ${p.title}...`);
-        await typeLine(`(Demo link) ${p.link}`);
-      }
+  return new Promise(resolve=>{
+    let i=0;
+    function type(){
+      line.innerHTML = text.slice(0,i);
+      output.scrollTop = output.scrollHeight;
+      if(i < text.length){
+        i++;
+        setTimeout(()=>requestAnimationFrame(type), speed);
+      } else resolve();
+    }
+    type();
+  });
+}
 
-      // initial boot-up animation
-      (async function boot(){
-        input.disabled = true;
-        await typeLine('Initializing Garyson_Walker.exe...',{speed:20});
-        await typeLine('Loading modules: [matrix] [term] [projects] [skills]',{speed:18});
-        await typeLine('System online. Welcome, Guest. Type "help" to begin.',{speed:18});
-        input.disabled = false; input.focus();
-      })();
+function printBlock(lines){
+  return new Promise(async resolve=>{
+    for(const line of lines){
+      await typeLine(line);
+    }
+    resolve();
+  });
+}
 
-      // event listeners
-      input.addEventListener('keydown',async (e)=>{
-        if(e.key === 'Enter'){
-          const raw = input.value;
-          if(!raw) return;
-          // echo the command
-          await typeLine(`guest@matrix:~$ ${raw}`);
-          const {cmd,arg} = parse(raw);
-          input.value='';
-          if(commands[cmd]){
-            try{ await commands[cmd](arg); }catch(err){ await typeLine('Error running command.'); }
-          } else if(cmd === 'open' && arg){
-            await handleOpen(arg);
-          } else if(!cmd){
-            // nothing
-          } else {
-            await typeLine(`Command not recognized: ${cmd}`);
-            await typeLine('Type "help" for a list of commands.');
-          }
-        }
-      });
+async function runCommand(cmd){
+  cmd = cmd.trim().toLowerCase();
 
-      // quick buttons
-      quick.forEach(b=>b.addEventListener('click',async ()=>{ const c=b.dataset.cmd; input.value=c; const ev=new KeyboardEvent('keydown',{key:'Enter'}); input.dispatchEvent(ev); }));
-      surprise.addEventListener('click',async ()=>{ await commands.unlock(); });
+  if(!cmd) return;
 
-      // focus behavior
-      document.addEventListener('click',()=>{ input.focus(); });
+  switch(cmd){
+    case "help":
+      await printBlock([
+        "Commands:",
+        " about - Bio info",
+        " skills - Technical skills",
+        " projects - Portfolio items",
+        " contact - Email / GitHub / LinkedIn",
+        " clear - Clear screen",
+        " help - Show commands"
+      ]);
+      break;
 
-    })();
+    case "about":
+      await typeLine(`Name: ${profile.name}`);
+      await typeLine(`Role: ${profile.role}`);
+      await typeLine(`About: ${profile.about}`);
+      break;
 
-    /* ================== Optional custom cursor ================== */
-    (function cursor(){
-      const cursor = document.getElementById('cursor');
-      document.body.classList.add('cursor-glow');
-      cursor.style.display='block';
-      window.addEventListener('mousemove',e=>{
-        cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-      });
-    })();
+    case "skills":
+      await typeLine("Skills:");
+      for(const s of profile.skills) await typeLine(` - ${s}`);
+      break;
 
-  </script>
+    case "projects":
+      await typeLine("Projects:");
+      for(const p of profile.projects) await typeLine(` - ${p}`);
+      break;
+
+    case "contact":
+      await typeLine("Contact:");
+      await typeLine(` Email: <a href="${profile.contact.email}" target="_blank">${profile.contact.email.replace("mailto:","")}</a>`);
+      await typeLine(` GitHub: <a href="${profile.contact.github}" target="_blank">${profile.contact.github}</a>`);
+      await typeLine(` LinkedIn: <a href="${profile.contact.linkedin}" target="_blank">${profile.contact.linkedin}</a>`);
+      break;
+
+    case "clear":
+      output.innerHTML="";
+      break;
+
+    default:
+      await typeLine("Unknown command. Type 'help'");
+  }
+}
+
+// submit on enter
+input.addEventListener("keydown", async e=>{
+  if(e.key==="Enter"){
+    const cmd = input.value;
+    await typeLine(`> ${cmd}`);
+    input.value="";
+    await runCommand(cmd);
+  }
+});
+
+// intro
+(async function boot(){
+  await typeLine("Initializing terminal...");
+  await typeLine("System ready. Type 'help' to begin.");
+})();
+</script>
 </body>
 </html>
