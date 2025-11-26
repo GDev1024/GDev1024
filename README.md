@@ -6,7 +6,7 @@
 
 ### About Me
 
-I’m **Garyson**, an IT student passionate about **programming**, **web development**, and **hardware engineering**. I love turning ideas into projects while exploring new technologies.
+I’m an Inofrmation Tech student insterested in **programming**, **web development**, **hardware engineering** and **networking**. I love turning ideas into projects and exploring new technologies.
 
 I’m excited to connect with the GitHub community and grow as a developer. 
 
@@ -15,8 +15,9 @@ I’m excited to connect with the GitHub community and grow as a developer.
 ## 👋 A Little More About Me
 
 - Currently learning various programming languages such as **C++, Python, JavaScript, HTML5, CSS3, PHP, Lua**
-- Exploring **front-end development, backend logic, and software fundamentals**
-- In my free time, I enjoy **building small projects**, **experimenting with code**, and **learning through hands-on tinkering**
+- Knowledgeable on **front-end development, backend logic and hardware + software fundamentals** 
+- Currently exploring networking concepts to build a stronger understanding of it's infrastructures and systems
+- Always trying to learn, experiment, and work on new projects to improve my technical abilities
 
 
 ---
