@@ -49,14 +49,6 @@ I’m an **Information Technology** student at **T.A. Marryshow Community Colleg
 
 ---
 
-### 📊 Performance Metrics
-<p align="left">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=YourGitHubUsername&layout=compact&theme=radical&hide_border=true" alt="Top Langs" height="165" />
-  <img src="https://github-readme-stats.vercel.app/api?username=YourGitHubUsername&show_icons=true&theme=radical&hide_border=true" alt="Stats" height="165" />
-</p>
-
----
-
 ### 📫 Connect with Me
 - 🔭 Working on: **Network Infrastructure Labs** & **SpiceFetch**
 - 🌱 Learning: **AWS Solutions Architect** & Advanced Cyber-Ops
