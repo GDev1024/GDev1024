@@ -1,11 +1,3 @@
-<p align="center">
-  <a href="https://git.io/typing-svg">
-    <img src="https://readme-typing-svg.herokuapp.com?font=Ballet&size=30&duration=2500&pause=2000&color=FFFFFF&width=435&lines=Stay+hydrated+and+sanitize+your+inputs!" alt="Typing SVG" />
-  </a>
-</p>
-
----
-
 ### 👨‍💻 About Me
 
 I’m an **Information Technology** student at **T.A. Marryshow Community College**. While I build full-stack applications, my core focus is **Network Administration** and **Cloud Infrastructure**. I enjoy the challenge of architecting secure, high-availability systems on **macOS** and **Linux**.
@@ -53,3 +45,10 @@ I’m an **Information Technology** student at **T.A. Marryshow Community Colleg
 - 🔭 Working on: **Network Infrastructure Labs** & **SpiceFetch**
 - 🌱 Learning: **AWS Solutions Architect** & Advanced Cyber-Ops
 - 💬 Ask me about: Why I’m transitioning deeper into **Networking** and **Linux** environments.
+
+---
+<p align="center">
+  <a href="https://git.io/typing-svg">
+    <img src="https://readme-typing-svg.herokuapp.com?font=Ballet&size=30&duration=2500&pause=2000&color=FFFFFF&width=435&lines=Stay+hydrated+and+sanitize+your+inputs!" alt="Typing SVG" />
+  </a>
+</p>
