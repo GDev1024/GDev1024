@@ -44,14 +44,14 @@ I'm an **Information Technology** student at **T.A. Marryshow Community College*
 
 ### 📜 Certifications
 
-| Badge | Certification | Issuer | Date |
-|-------|--------------|--------|------|
-| 🏅 | [Artificial Intelligence Fundamentals](https://www.credly.com) | IBM | Jun 2026 |
-| 🏅 | [Data Fundamentals](https://www.credly.com/badges/8ff149bb-8b2b-4b64-9de7-df457a606b39/linked_in_profile) | IBM | Jun 2026 |
+| Badge | Certification | Issuer |
+|-------|--------------|--------| 
+| 🏅 | [Artificial Intelligence Fundamentals](https://www.credly.com) | IBM |
+| 🏅 | [Data Fundamentals](https://www.credly.com/badges/8ff149bb-8b2b-4b64-9de7-df457a606b39/linked_in_profile) | IBM |
 
 ---
 
-### 🌟 Project Spotlight: SpiceFetch 🇬🇩
+### 🌟 Project Spotlight: SpiceFetch
 *A production-ready marketplace platform built for the Grenadian digital economy.*
 
 - **Infrastructure**: Deployed on **AWS EC2** using **Docker** container orchestration.
