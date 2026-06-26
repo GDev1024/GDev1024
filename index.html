@@ -3,10 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Garyson Walker - Matrix Portfolio</title>
+<title>Garyson Walker — gdev</title>
+<meta name="description" content="Interactive terminal portfolio of Garyson Walker — Network, Cloud & AI. Type 'help' to explore.">
+<meta name="author" content="Garyson Walker">
+
+<!-- Open Graph -->
+<meta property="og:type"        content="website">
+<meta property="og:url"         content="https://gdev1024.github.io/GDev1024/">
+<meta property="og:title"       content="Garyson Walker — gdev">
+<meta property="og:description" content="Interactive terminal portfolio — Network, Cloud & AI. Type 'help' to explore.">
+<meta property="og:image"       content="https://gdev1024.github.io/GDev1024/preview.png">
+
+<!-- LinkedIn (reads OG tags above) -->
+<meta property="og:see_also" content="https://www.linkedin.com/in/garyson-walker-845183388/">
+
+<link rel="canonical" href="https://gdev1024.github.io/GDev1024/">
+
+<!-- Inline favicon — terminal prompt icon, no extra file needed -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><text x='4' y='24' font-family='monospace' font-size='22' fill='%2300ff66'>&#62;_</text></svg>">
 <style>
 :root{
   --neon:#00ff66;
+  --neon-dim:rgba(0,255,102,0.45);
+  --neon-glow:rgba(0,255,102,0.25);
   --bg:#000;
   --font:"Courier New", monospace;
 }
@@ -21,20 +40,48 @@ body{
   overflow:hidden;
   cursor:none;
 }
+/* CRT scanline overlay */
+body::after{
+  content:"";
+  display:block;
+  position:fixed;
+  top:0;left:0;
+  width:100vw;height:100vh;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,0.04),
+    rgba(0,0,0,0.04) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events:none;
+  z-index:10;
+}
+/* CRT vignette */
+body::before{
+  content:"";
+  display:block;
+  position:fixed;
+  top:0;left:0;
+  width:100vw;height:100vh;
+  background:radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.65) 100%);
+  pointer-events:none;
+  z-index:10;
+}
 #matrix{
   position:fixed;
-  top:0; left:0;
-  width:100vw; height:100vh;
+  top:0;left:0;
+  width:100vw;height:100vh;
   z-index:1;
+  opacity:0.22;
 }
 #terminal{
   position:fixed;
-  top:0; left:0;
-  width:100vw; height:100vh;
-  padding:20px;
+  top:0;left:0;
+  width:100vw;height:100vh;
+  padding:20px 24px;
   display:flex;
   flex-direction:column;
-  justify-content:flex-end;
   z-index:2;
   pointer-events:none;
 }
@@ -42,17 +89,30 @@ body{
   flex:1;
   overflow-y:auto;
   white-space:pre-wrap;
-  padding-right:20px;
+  padding-right:16px;
   pointer-events:auto;
+  line-height:1.5;
 }
-.line{ margin:3px 0; }
+.line{ margin:2px 0; }
+.line.dim{ opacity:0.55; }
+.line.bright{
+  text-shadow:0 0 8px var(--neon), 0 0 18px var(--neon-dim);
+}
+.line.ascii{
+  color:var(--neon);
+  text-shadow:0 0 6px var(--neon), 0 0 20px var(--neon-glow);
+  line-height:1.2;
+}
 .prompt-line{
   display:flex;
   align-items:center;
   pointer-events:auto;
+  padding-top:6px;
 }
 .prompt{
-  margin-right:5px;
+  margin-right:6px;
+  white-space:nowrap;
+  text-shadow:0 0 8px var(--neon);
 }
 input.prompt-input{
   background:transparent;
@@ -62,45 +122,81 @@ input.prompt-input{
   width:100%;
   font-family:var(--font);
   font-size:1rem;
-  caret-color:var(--neon);
+  caret-color:transparent;
+  text-shadow:0 0 6px var(--neon);
 }
-::-webkit-scrollbar{width:8px;}
-::-webkit-scrollbar-thumb{background:var(--neon);}
+/* Blinking block cursor */
+.cursor-block{
+  display:inline-block;
+  width:0.6em;height:1em;
+  background:var(--neon);
+  vertical-align:text-bottom;
+  margin-left:1px;
+  animation:blink 1.1s step-end infinite;
+  box-shadow:0 0 8px var(--neon);
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-thumb{background:var(--neon-dim);border-radius:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+/* Custom mouse cursor */
 .glow-cursor{
   position:fixed;
   pointer-events:none;
-  width:12px;height:12px;
+  width:10px;height:10px;
   border-radius:50%;
   left:0;top:0;
   transform:translate(-50%,-50%);
   z-index:9999;
   mix-blend-mode:screen;
   background:rgba(0,255,102,0.95);
-  box-shadow:0 0 18px rgba(0,255,102,0.9);
-  opacity:0.9;
+  box-shadow:0 0 14px 3px rgba(0,255,102,0.7);
+  transition:transform 0.05s ease;
 }
-a{color:var(--neon); text-decoration:none;}
+a{color:var(--neon);text-decoration:none;text-shadow:0 0 6px var(--neon-dim);}
+a:hover{text-decoration:underline;text-shadow:0 0 10px var(--neon);}
+/* Loading bar */
+.bar-wrap{
+  display:inline-block;
+  width:30ch;
+  background:rgba(0,255,102,0.12);
+}
+.bar-fill{
+  display:inline-block;
+  height:1em;
+  background:var(--neon);
+  box-shadow:0 0 8px var(--neon);
+  vertical-align:middle;
+}
+/* Autocomplete hint */
+#hint{
+  font-size:0.78rem;
+  color:rgba(0,255,102,0.38);
+  pointer-events:none;
+  padding-bottom:2px;
+  padding-left:20px;
+  min-height:1.2em;
+}
 </style>
 </head>
 <body>
-
 <canvas id="matrix"></canvas>
-
 <div id="terminal">
   <div id="output"></div>
+  <div id="hint"></div>
   <div class="prompt-line">
-    <div class="prompt">></div>
-    <input type="text" class="prompt-input" id="cmd" autofocus autocomplete="off">
+    <div class="prompt">gdev@terminal:~$</div>
+    <input type="text" class="prompt-input" id="cmd" autocomplete="off" spellcheck="false">
+    <span class="cursor-block"></span>
   </div>
 </div>
-
 <div class="glow-cursor" id="cursor"></div>
-
 <script>
 // --------------------------------------------------
-// Custom Mouse Cursor (Smooth & Stable)
+// Custom Mouse Cursor
 // --------------------------------------------------
-(function cursor(){
+(function(){
   const cursor = document.getElementById("cursor");
   window.addEventListener("mousemove", e=>{
     cursor.style.left = e.clientX+"px";
@@ -109,159 +205,398 @@ a{color:var(--neon); text-decoration:none;}
 })();
 
 // --------------------------------------------------
-// Matrix Rain Effect (Optimized Performance)
+// Matrix Rain  (binary + hex nibbles + symbols)
 // --------------------------------------------------
-(function matrixRain(){
+(function(){
   const c = document.getElementById("matrix");
   const ctx = c.getContext("2d");
-  c.width = window.innerWidth;
-  c.height = window.innerHeight;
-
-  const chars = "01";
-  const font = 16;
-  const columns = Math.floor(c.width / font);
-  const drops = new Array(columns).fill(1);
-
+  function resize(){
+    c.width  = window.innerWidth;
+    c.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+  const chars = "01アイウエオカキクケコ0123456789ABCDEF#@%&+=-><";
+  const font  = 15;
+  let columns, drops;
+  function init(){
+    columns = Math.floor(c.width / font);
+    drops   = new Array(columns).fill(0).map(()=>Math.floor(Math.random()*-50));
+  }
+  init();
+  window.addEventListener("resize", init);
   function draw(){
-    ctx.fillStyle = "rgba(0,0,0,0.10)";
+    ctx.fillStyle = "rgba(0,0,0,0.20)";
     ctx.fillRect(0,0,c.width,c.height);
-    ctx.fillStyle = "#00ff66";
     ctx.font = font+"px monospace";
-
     for(let i=0;i<drops.length;i++){
       const text = chars[Math.floor(Math.random()*chars.length)];
-      ctx.fillText(text, i*font, drops[i]*font);
-      if(drops[i]*font > c.height && Math.random()>0.975) drops[i]=0;
+      const y = drops[i]*font;
+      // Head character
+      ctx.fillStyle = "#66cc88";
+      ctx.fillText(text, i*font, y);
+      // Trail
+      ctx.fillStyle = "#009944";
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*font, y - font);
+      if(y > c.height && Math.random()>0.975) drops[i] = 0;
       drops[i]++;
     }
-
-    // limit FPS = smoother + less CPU
-    setTimeout(()=>requestAnimationFrame(draw), 30);
+    setTimeout(()=>requestAnimationFrame(draw), 60);
   }
   draw();
 })();
 
 // --------------------------------------------------
-// Terminal System
+// Profile Data
 // --------------------------------------------------
-const output = document.getElementById("output");
-const input = document.getElementById("cmd");
-
 const profile = {
   name: "Garyson Walker",
-  role: "Software Developer",
-  about: "I build clean, modern software with real-world impact. Focused on web development, secure systems, and automation.",
+  role: "Network & Cloud Infrastructure | IT Student",
+  about: [
+    "IT student at T.A. Marryshow Community College (Associate's, 2024-2026).",
+    "Specializing in Network Administration and Cloud Infrastructure,",
+    "with hands-on experience in full-stack development and AI/Data systems.",
+    "I architect secure, high-availability systems on Linux and macOS."
+  ],
   contact:{
-    email: "mailto:jesuisgxry@gmail.com",
-    github: "https://github.com/GDev1024",
-    linkedin: "http://linkedin.com/in/garyson-walker-845183388"
+    email:    "jesuisgxry@gmail.com",
+    github:   "https://github.com/GDev1024",
+    linkedin: "https://linkedin.com/in/garyson-walker-845183388"
   },
-  skills:[
-    "HTML/CSS/JavaScript",
-    "Node.js",
-    "Python",
-    "Linux/Ubuntu server hosting"
+  skills:{
+    "Languages":   ["Python","JavaScript","TypeScript","PHP","Java","C++","Lua"],
+    "Frontend":    ["React.js","HTML/CSS"],
+    "Backend":     ["Node.js","MySQL"],
+    "Cloud & Ops": ["AWS (EC2, S3, RDS)","Docker","Linux/Ubuntu"],
+    "Networking":  ["Topology Design","Switch/Router Config","Server Management"],
+    "Cyber":       ["Threat Detection","Traffic Analysis","Encryption","Vuln Assessment"],
+    "AI & Data":   ["Machine Learning","Deep Learning","Neural Networks","IBM Watson","Data Analysis"]
+  },
+  experience:[
+    {
+      title:  "Information Technology Intern",
+      org:    "Grenada Chamber of Industry and Commerce",
+      period: "May 2026 - Present",
+      type:   "Full-time · On-site · Grand Anse, Grenada",
+      duties: ["Troubleshooting & IT support","Web development","Graphic design","IT infrastructure maintenance"]
+    }
+  ],
+  education:[
+    {
+      degree: "Associate's Degree, Information Technology",
+      school: "T.A. Marryshow Community College",
+      period: "2024 – 2026",
+      focus:  "Network Administration & Cloud Infrastructure"
+    }
+  ],
+  certs:[
+    { name:"Artificial Intelligence Fundamentals", issuer:"IBM", date:"Jun 2026" },
+    { name:"Data Fundamentals", issuer:"IBM", date:"Jun 2026",
+      url:"https://www.credly.com/badges/8ff149bb-8b2b-4b64-9de7-df457a606b39/linked_in_profile" }
   ],
   projects:[
-    "⚡ Portfolio Terminal Interface (this one)",
-    "📦 Web hosting prototype on Ubuntu",
-    "🤖 Automation + scripting tools"
+    {
+      name: "SpiceFetch",
+      desc: "Production-grade marketplace for the Grenadian digital economy.",
+      stack:"AWS EC2 · Docker · Amazon S3 · RDS · Twilio Verify (MFA)"
+    },
+    {
+      name: "Portfolio Terminal",
+      desc: "This interactive terminal-style portfolio site.",
+      stack:"Vanilla JS · Canvas API · CSS"
+    },
+    {
+      name: "Network Infrastructure Labs",
+      desc: "Simulated enterprise network topologies and server environments.",
+      stack:"Linux · Cisco CLI · Ubuntu Server"
+    }
   ]
 };
 
-// smooth typer (optimized)
-function typeLine(text, speed=18){
-  const line = document.createElement("div");
-  line.className="line";
-  output.appendChild(line);
+// --------------------------------------------------
+// Terminal Engine
+// --------------------------------------------------
+const outputEl = document.getElementById("output");
+const input    = document.getElementById("cmd");
+const hintEl   = document.getElementById("hint");
 
+function appendLine(text, cls=""){
+  const div = document.createElement("div");
+  div.className = "line" + (cls ? " "+cls : "");
+  div.innerHTML = text;
+  outputEl.appendChild(div);
+  outputEl.scrollTop = outputEl.scrollHeight;
+  return div;
+}
+
+function typeLine(text, speed=14, cls=""){
+  const div = appendLine("", cls);
   return new Promise(resolve=>{
+    if(speed === 0){ div.innerHTML = text; resolve(); return; }
     let i=0;
-    function type(){
-      line.innerHTML = text.slice(0,i);
-      output.scrollTop = output.scrollHeight;
-      if(i < text.length){
-        i++;
-        setTimeout(()=>requestAnimationFrame(type), speed);
-      } else resolve();
+    function tick(){
+      div.innerHTML = text.slice(0,i);
+      outputEl.scrollTop = outputEl.scrollHeight;
+      if(i < text.length){ i++; setTimeout(()=>requestAnimationFrame(tick), speed); }
+      else resolve();
     }
-    type();
+    tick();
   });
 }
 
-function printBlock(lines){
-  return new Promise(async resolve=>{
-    for(const line of lines){
-      await typeLine(line);
-    }
-    resolve();
+async function printBlock(lines, speed, cls){
+  for(const l of lines) await typeLine(l, speed, cls);
+}
+
+// Instant print (no typing animation) — used for bulk content
+function printInstant(lines, cls=""){
+  for(const l of lines) appendLine(l, cls);
+}
+
+// Animated loading bar
+function loadingBar(label, durationMs=900){
+  return new Promise(resolve=>{
+    const total = 28;
+    let filled  = 0;
+    const div   = appendLine(label + " [" + " ".repeat(total) + "] 0%");
+    const id = setInterval(()=>{
+      filled++;
+      const pct = Math.round((filled/total)*100);
+      div.innerHTML = label + " [" +
+        "█".repeat(filled) + " ".repeat(total-filled) +
+        `] ${pct}%`;
+      outputEl.scrollTop = outputEl.scrollHeight;
+      if(filled >= total){ clearInterval(id); resolve(); }
+    }, durationMs / total);
   });
 }
+
+// --------------------------------------------------
+// Commands
+// --------------------------------------------------
+const COMMANDS = ["help","about","skills","experience","education","certs","projects","contact","socials","whoami","ls","clear"];
+
+function separator(){ appendLine("─".repeat(54), "dim"); }
 
 async function runCommand(cmd){
   cmd = cmd.trim().toLowerCase();
-
   if(!cmd) return;
 
   switch(cmd){
+
     case "help":
-      await printBlock([
-        "Commands:",
-        " about - Bio info",
-        " skills - Technical skills",
-        " projects - Portfolio items",
-        " contact - Email / GitHub / LinkedIn",
-        " clear - Clear screen",
-        " help - Show commands"
+    case "ls":
+      printInstant([
+        "┌─────────────────────────────────────────────────────┐",
+        "│  AVAILABLE COMMANDS                                  │",
+        "├─────────────────────────────────────────────────────┤",
+        "│  about       Bio and background                      │",
+        "│  skills      Full tech stack                         │",
+        "│  experience  Work history                            │",
+        "│  education   Academic background                     │",
+        "│  certs       Certifications                          │",
+        "│  projects    Portfolio projects                      │",
+        "│  contact     Email / GitHub / LinkedIn               │",
+        "│  socials     Social link shortcuts                   │",
+        "│  whoami      Quick identity card                     │",
+        "│  clear       Clear the terminal                      │",
+        "└─────────────────────────────────────────────────────┘"
+      ],"bright");
+      break;
+
+    case "whoami":
+      printInstant([
+        "╔══ Who Am I ══════════════════════════════════════╗",
+        `  Name   : ${profile.name}`,
+        `  Handle : gdev`,
+        `  Role   : ${profile.role}`,
+        `  Origin : Grenada`,
+        `  Focus  : Cloud · Networking · AI`,
+        "╚═══════════════════════════════════════════════════╝",
       ]);
       break;
 
     case "about":
-      await typeLine(`Name: ${profile.name}`);
-      await typeLine(`Role: ${profile.role}`);
-      await typeLine(`About: ${profile.about}`);
+      printInstant(["╔══ About ═════════════════════════════════════════╗",""]);
+      for(const l of profile.about) await typeLine("  " + l, 12);
+      appendLine("");
+      appendLine("╚═══════════════════════════════════════════════════╝","dim");
       break;
 
     case "skills":
-      await typeLine("Skills:");
-      for(const s of profile.skills) await typeLine(` - ${s}`);
+      printInstant(["╔══ Tech Stack ════════════════════════════════════╗"]);
+      for(const [cat, items] of Object.entries(profile.skills)){
+        appendLine(`  <span style="opacity:.7">[${cat}]</span>`);
+        appendLine("    " + items.join("  ·  "));
+      }
+      appendLine("╚═══════════════════════════════════════════════════╝","dim");
+      break;
+
+    case "experience":
+      printInstant(["╔══ Experience ════════════════════════════════════╗",""]);
+      for(const job of profile.experience){
+        printInstant([
+          `  ◆ ${job.title}`,
+          `    ${job.org}`,
+          `    ${job.period}`,
+          `    ${job.type}`,
+        ]);
+        for(const d of job.duties) appendLine(`      • ${d}`);
+        appendLine("");
+      }
+      appendLine("╚═══════════════════════════════════════════════════╝","dim");
+      break;
+
+    case "education":
+      printInstant(["╔══ Education ═════════════════════════════════════╗",""]);
+      for(const e of profile.education){
+        printInstant([
+          `  ◆ ${e.degree}`,
+          `    ${e.school}`,
+          `    ${e.period}`,
+          `    Focus: ${e.focus}`,
+        ]);
+      }
+      appendLine("╚═══════════════════════════════════════════════════╝","dim");
+      break;
+
+    case "certs":
+      printInstant(["╔══ Certifications ════════════════════════════════╗",""]);
+      for(const cert of profile.certs){
+        const link = cert.url
+          ? `<a href="${cert.url}" target="_blank">${cert.name}</a>`
+          : cert.name;
+        appendLine(`  [*] ${link}`);
+        appendLine(`     ${cert.issuer}  ·  Issued ${cert.date}`);
+        appendLine("");
+      }
+      appendLine("╚═══════════════════════════════════════════════════╝","dim");
       break;
 
     case "projects":
-      await typeLine("Projects:");
-      for(const p of profile.projects) await typeLine(` - ${p}`);
+      printInstant(["╔══ Projects ══════════════════════════════════════╗",""]);
+      for(const p of profile.projects){
+        appendLine(`  [+] ${p.name}`);
+        appendLine(`     ${p.desc}`);
+        appendLine(`     <span style="opacity:.65">Stack:</span> ${p.stack}`);
+        appendLine("");
+      }
+      appendLine("╚═══════════════════════════════════════════════════╝","dim");
       break;
 
     case "contact":
-      await typeLine("Contact:");
-      await typeLine(` Email: <a href="${profile.contact.email}" target="_blank">${profile.contact.email.replace("mailto:","")}</a>`);
-      await typeLine(` GitHub: <a href="${profile.contact.github}" target="_blank">${profile.contact.github}</a>`);
-      await typeLine(` LinkedIn: <a href="${profile.contact.linkedin}" target="_blank">${profile.contact.linkedin}</a>`);
+    case "socials":
+      printInstant(["╔══ Contact ═══════════════════════════════════════╗",""]);
+      appendLine(`  [mail]  <a href="mailto:${profile.contact.email}">${profile.contact.email}</a>`);
+      appendLine(`  [git]   <a href="${profile.contact.github}" target="_blank">${profile.contact.github}</a>`);
+      appendLine(`  [in]    <a href="${profile.contact.linkedin}" target="_blank">${profile.contact.linkedin}</a>`);
+      appendLine("");
+      appendLine("╚═══════════════════════════════════════════════════╝","dim");
       break;
 
     case "clear":
-      output.innerHTML="";
+      outputEl.innerHTML = "";
       break;
 
     default:
-      await typeLine("Unknown command. Type 'help'");
+      await typeLine(`  bash: '${cmd}': command not found. Type 'help' for available commands.`, 10);
   }
 }
 
-// submit on enter
+// --------------------------------------------------
+// ASCII Banner
+// --------------------------------------------------
+function printBanner(){
+  const art = [
+    " ██████╗ ██████╗ ███████╗██╗   ██╗",
+    "██╔════╝ ██╔══██╗██╔════╝██║   ██║",
+    "██║  ███╗██║  ██║█████╗  ██║   ██║",
+    "██║   ██║██║  ██║██╔══╝  ╚██╗ ██╔╝",
+    "╚██████╔╝██████╔╝███████╗ ╚████╔╝ ",
+    " ╚═════╝ ╚═════╝ ╚══════╝  ╚═══╝  ",
+    "",
+    " Garyson Walker  ·  Networking · Cloud Computing · AI",
+    "",
+  ];
+  for(const l of art) appendLine(l, "ascii");
+}
+
+// --------------------------------------------------
+// Command History
+// --------------------------------------------------
+const history = [];
+let histIdx   = -1;
+
 input.addEventListener("keydown", async e=>{
-  if(e.key==="Enter"){
-    const cmd = input.value;
-    await typeLine(`> ${cmd}`);
-    input.value="";
+
+  if(e.key === "ArrowUp"){
+    e.preventDefault();
+    if(history.length === 0) return;
+    histIdx = Math.min(histIdx+1, history.length-1);
+    input.value = history[histIdx];
+    setTimeout(()=>input.setSelectionRange(input.value.length, input.value.length),0);
+    return;
+  }
+  if(e.key === "ArrowDown"){
+    e.preventDefault();
+    histIdx = Math.max(histIdx-1, -1);
+    input.value = histIdx === -1 ? "" : history[histIdx];
+    return;
+  }
+
+  // Tab autocomplete
+  if(e.key === "Tab"){
+    e.preventDefault();
+    const partial = input.value.trim().toLowerCase();
+    if(!partial) return;
+    const matches = COMMANDS.filter(c=>c.startsWith(partial));
+    if(matches.length === 1){
+      input.value = matches[0];
+      hintEl.textContent = "";
+    } else if(matches.length > 1){
+      hintEl.textContent = "  " + matches.join("   ");
+    }
+    return;
+  }
+
+  // Clear hint on any other key
+  hintEl.textContent = "";
+
+  if(e.key === "Enter"){
+    const cmd = input.value.trim();
+    if(cmd){
+      history.unshift(cmd);
+      histIdx = -1;
+    }
+    appendLine(`<span style="opacity:.55">gdev@terminal:~$</span> ${cmd}`);
+    input.value = "";
     await runCommand(cmd);
   }
 });
 
-// intro
+// Live autocomplete hint while typing
+input.addEventListener("input", ()=>{
+  const partial = input.value.trim().toLowerCase();
+  if(!partial){ hintEl.textContent=""; return; }
+  const matches = COMMANDS.filter(c=>c.startsWith(partial) && c !== partial);
+  hintEl.textContent = matches.length ? "  " + matches.join("   ") : "";
+});
+
+// Keep focus on input when clicking output
+outputEl.addEventListener("click", ()=> input.focus());
+document.addEventListener("click", ()=> input.focus());
+
+// --------------------------------------------------
+// Boot Sequence
+// --------------------------------------------------
 (async function boot(){
-  await typeLine("Initializing terminal...");
-  await typeLine("System ready. Type 'help' to begin.");
+  await typeLine("Initializing system...", 20, "dim");
+  await loadingBar("  [BOOT]", 700);
+  outputEl.innerHTML = "";
+  printBanner();
+  await typeLine(`  Type <span style="font-weight:bold">'help'</span> for available commands.`, 14);
+  await typeLine("", 0);
+  input.focus();
 })();
 </script>
 </body>
